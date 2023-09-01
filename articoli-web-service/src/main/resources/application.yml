@@ -1,7 +1,8 @@
-#==========================================================
-#= Articoli Web Service - Versione Base
-#==========================================================
 
+ 
+ #==========================================================
+#= Articoli Web Service - Versione Sicurezza JWT
+#==========================================================
 server:
   port: 5051
   
@@ -26,10 +27,22 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
-    
-#==== ACCESSO GEST USER
+# ==============================================================    
+#= Opzioni Accesso Servizio gestuser            
+# ==============================================================
 gestuser:
   srvUrl: http://localhost:8019/api/utenti/cerca/userid/
-  userId : ReadUser
-  password: BimBumBam_2018
- 
+  userId: ReadUser
+  password: BimBumBam_2018 # ==============================================================
+# = Parametri Sicurezza JWT 
+# ==============================================================
+sicurezza:
+    header: Authorization
+    secret: $123_Stella@xantrix.it
+    
+# ==============================================================
+# = Livello Log di Sicurezza
+# ==============================================================  
+logging:
+  level:
+    org.springframework.security: DEBUG

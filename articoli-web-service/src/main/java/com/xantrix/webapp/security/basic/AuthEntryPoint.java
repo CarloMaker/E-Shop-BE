@@ -1,4 +1,4 @@
-package com.xantrix.webapp.security;
+package com.xantrix.webapp.security.basic;
 
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -1,4 +1,4 @@
-package com.xantrix.webapp.security;
+package com.xantrix.webapp.security.basic;
 
 import java.util.List;
 import lombok.Data;

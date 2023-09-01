@@ -1,4 +1,4 @@
-package com.xantrix.webapp.security;
+package com.xantrix.webapp.security.basic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,12 +15,14 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.User.UserBuilder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
-@EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+//@Configuration
+//@EnableWebSecurity
+public class SecurityConfiguration{
 	
 	@Autowired
 	@Qualifier("customUserDetailsService")
@@ -36,15 +38,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 	
 	
-	@Override
+	/*@Override
 	public void configure(WebSecurity web) throws Exception {
 			super.configure(web);
 			web.ignoring().antMatchers(HttpMethod.OPTIONS,"/**"); // FONDAMENTALE X ANGULAR
 	}
-
+*/
 
 	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
+	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 	
@@ -74,7 +76,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private static final String[] ADMIN_PATHS = {"/api/articoli/inserisci/**","/api/articoli/modifica/**","/api/articoli/elimina/**"};
 	private static final String REALM = "REAME";
 
-	@Override
+/*	@Override
 	protected void configure(HttpSecurity http) throws Exception{
 		http.csrf().disable()
 		.authorizeHttpRequests()
@@ -86,8 +88,32 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		
 		
-	}
+	}*/
 
+	
+	@Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+       /* http.authorizeRequests()
+            .antMatchers("/securityNone")
+            .permitAll()
+            .anyRequest()
+            .authenticated()
+            .and()
+            .httpBasic()
+            .authenticationEntryPoint(getBasicAuthEntryPoint());
+       //http.addFilterAfter(new CustomFilter(), BasicAuthenticationFilter.class);
+        return http.build();*/
+		
+		http.csrf().disable()
+		.authorizeHttpRequests()
+			.antMatchers(USER_PATHS).hasRole("USER")
+			.antMatchers(ADMIN_PATHS).hasRole("ADMIN")
+		.and()
+		.httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
+		.and()
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		return http.build();
+    }
 	
 
 

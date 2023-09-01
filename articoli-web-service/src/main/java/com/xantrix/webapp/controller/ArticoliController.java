@@ -3,7 +3,9 @@ package com.xantrix.webapp.controller;
 import java.lang.ProcessHandle.Info;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ import lombok.extern.java.Log;
 
 @RestController
 @RequestMapping("api/articoli")
-@CrossOrigin("http://localhost:4200")
+//@CrossOrigin("http://localhost:4200")
 @Log
 public class ArticoliController {
 	
@@ -46,15 +48,38 @@ public class ArticoliController {
 	@Autowired
 	private ResourceBundleMessageSource errMessage;
 
+	@Autowired
+	private PriceClient priceClient;
+	
+	private double getPriceArt(String CodArt, String IdList, String Header)
+	{
+		
+		double Prezzo = (IdList.length() > 0) ? 
+				priceClient.getPriceArt(Header, CodArt, IdList) : 
+				priceClient.getDefPriceArt(Header, CodArt);
+		 
+		log.info("Prezzo Articolo " + CodArt + ": " + Prezzo);
+
+		return Prezzo;
+	}
+	
+
 	
 	@GetMapping(value="/test", produces = "application/json")
 	public ResponseEntity<InfoMsg> testAuth(){
 		return new ResponseEntity<InfoMsg>(new InfoMsg(LocalDate.now(), "Autenticazione effettuata."),HttpStatus.OK);
 	}
 	
-	@GetMapping(value="/cerca/barcode/{ean}", produces = "application/json")
-	public ResponseEntity<ArticoliDto> listArtByEan(@PathVariable ("ean") String ean) throws NotFoundException{
+	@GetMapping(value={"/cerca/barcode/{ean}","/cerca/barcode/{ean}/{idlist}"}, produces = "application/json")
+	public ResponseEntity<ArticoliDto> listArtByEan(@PathVariable ("ean") String ean,
+			@PathVariable("idlist") Optional<String> optIdList ,HttpServletRequest httpRequest)
+	 throws NotFoundException{
+		
 		log.info("Calling ListByEAN");
+		
+		String IdList = (optIdList.isPresent()) ? optIdList.get() : "";
+		String AuthHeader = httpRequest.getHeader("Authorization");
+
 		
 		ArticoliDto articolo =  articoliService.SelByBarcode(ean);
 		if(articolo == null) {
@@ -62,29 +87,47 @@ public class ArticoliController {
 			log.warning(errMsg);
 			throw new NotFoundException(errMsg);
 			
+		}else
+		{
+			articolo.setPrezzo(this.getPriceArt(articolo.getCodArt(), IdList, AuthHeader));
 		}
+
 		return new ResponseEntity<ArticoliDto>(articolo,HttpStatus.OK);
 	}
 	
 	
-	@GetMapping(value="/cerca/codice/{codArt}", produces = "application/json")
-	public ResponseEntity<ArticoliDto> listArtByCodArt(@PathVariable ("codArt") String codArt) throws NotFoundException{
+	@GetMapping(value = {"/cerca/codice/{codart}","/cerca/codice/{codart}/{idlist}"}, produces = "application/json")
+	public ResponseEntity<ArticoliDto> listArtByCodArt(@PathVariable("codart") String codArt,
+			@PathVariable("idlist") Optional<String> optIdList,
+			HttpServletRequest httpRequest) throws NotFoundException{
 		
 		log.info("Calling List Articoli");
+		String IdList = (optIdList.isPresent()) ? optIdList.get() : "";
+		String AuthHeader = httpRequest.getHeader("Authorization");
 		
+
 		ArticoliDto articolo = articoliService.SelByCodArt(codArt);
 		
 		if(articolo == null) {
 			String errMsg=String.format("L'articolo con codice %s non è stato trovato!", codArt);
 			log.warning(errMsg);
 			throw new NotFoundException(errMsg);
+		}else {
+			articolo.setPrezzo(this.getPriceArt(articolo.getCodArt(), IdList, AuthHeader));
+
 		}
 		return new ResponseEntity<ArticoliDto>(articolo,HttpStatus.OK);
 	}
 	
-	@GetMapping(value = "/cerca/descrizione/{filter}",produces = "application/json")
-	public ResponseEntity<List<ArticoliDto>> listArtByDesc(@PathVariable("filter") String filter ) throws NotFoundException{
+	@GetMapping(value = {"/cerca/descrizione/{filter}","/cerca/descrizione/{filter}/{idlist}"}, produces = "application/json")
+	public ResponseEntity<List<ArticoliDto>> listArtByDesc(@PathVariable("filter") String filter,
+			@PathVariable("idlist") Optional<String> optIdList,
+			HttpServletRequest httpRequest)	throws NotFoundException{
+		
 		log.info("Calling  listArtByDesc");
+		String authHeader = httpRequest.getHeader("Authorization");
+		String idList = (optIdList.isPresent()) ? optIdList.get() : "";
+
 		
 		List<ArticoliDto> articoli = articoliService.SelByDescrizione(filter.toUpperCase() + "%");
 		
@@ -92,6 +135,8 @@ public class ArticoliController {
 			String errMsg = String.format("Non trovato articoli con descrizione %s", filter);
 			log.warning(errMsg);
 			throw new NotFoundException(errMsg);
+		}else {
+			articoli.forEach(t -> t.setPrezzo(getPriceArt(t.getCodArt(), idList, authHeader)));
 		}
 		return new ResponseEntity<>(articoli, HttpStatus.OK);
 	}

@@ -1,4 +1,4 @@
-package com.xantrix.webapp.security;
+package com.xantrix.webapp.security.basic;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -17,13 +17,13 @@ import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.java.Log;
 
-@Service("customUserDetailsService")
+//@Service("customUserDetailsService")
 @Log
 public class CustomUserDetailsService implements UserDetailsService {
 	
 
 	@Autowired
-	UserConfig userConfig;
+	UserConfigBasic userConfig;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
