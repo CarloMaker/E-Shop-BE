@@ -1,0 +1,47 @@
+{
+  "groups": [
+    {
+      "name": "sicurezza",
+      "type": "com.xantrix.webapp.security.JwtConfig",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "sicurezza.expiration",
+      "type": "java.lang.Integer",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    },
+    {
+      "name": "sicurezza.header",
+      "type": "java.lang.String",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    },
+    {
+      "name": "sicurezza.noexpiration",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    },
+    {
+      "name": "sicurezza.prefix",
+      "type": "java.lang.String",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    },
+    {
+      "name": "sicurezza.refresh",
+      "type": "java.lang.String",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    },
+    {
+      "name": "sicurezza.secret",
+      "type": "java.lang.String",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    },
+    {
+      "name": "sicurezza.uri",
+      "type": "java.lang.String",
+      "sourceType": "com.xantrix.webapp.security.JwtConfig"
+    }
+  ],
+  "hints": []
+}
